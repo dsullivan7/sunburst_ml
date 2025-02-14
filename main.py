@@ -4,8 +4,10 @@ import pandas as pd
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import train_test_split
 
-def run():
-    # import weather data
+import tensorflow as tf
+
+def get_data():
+       # import weather data
     nyc_temps = []
     weather_directory = './data/weather'
     for filename in os.listdir(weather_directory):
@@ -37,11 +39,22 @@ def run():
     final_nyc_prices["Day"] = final_nyc_prices["Time Stamp"].apply(lambda x: x.day)
     final_nyc_prices["Minutes"] = final_nyc_prices["Time Stamp"].apply(lambda x: x.hour * 60 + x.minute)
 
-    print(final_nyc_prices)
+    final_nyc_prices.to_csv("./data/data.csv")
+
+def run():
+    data = pd.read_csv(os.path.join('./data/data.csv'), header = 0)
+
+    print(data)
     print("training model")
 
+    # model = tf.keras.Sequential([
+    #     tf.keras.layers.Input(shape=(1,)),        # Input layer
+    #     tf.keras.layers.Dense(32, activation='relu'),  # Hidden layer with 32 neurons and ReLU activation
+    #     tf.keras.layers.Dense(1)                  # Output layer with a single neuron (for regression)
+    # ])
+    # model.compile(optimizer='adam', loss='mean_squared_error')
     model = RandomForestRegressor(n_estimators=100)
-    model.fit(final_nyc_prices[["Year", "Month", "Day", "Minutes", "Max Temp", "Min Temp", "Max Wet Bulb", "Min Wet Bulb"]], final_nyc_prices["LBMP ($/MWHr)"])
+    model.fit(data[["Year", "Month", "Day", "Minutes", "Max Temp", "Min Temp", "Max Wet Bulb", "Min Wet Bulb"]], data["LBMP ($/MWHr)"])
 
     # date: 2025/02/13 16:45
     results = model.predict([[2025, 2, 13, (16 * 60) + 45, 46, 34, 43, 31]])

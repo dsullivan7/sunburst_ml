@@ -9,8 +9,9 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "scikit-learn (>=1.6.1,<2.0.0)",
-    "numpy (>=2.2.3,<3.0.0)",
-    "pandas (>=2.2.3,<3.0.0)"
+    "pandas (>=2.2.3,<3.0.0)",
+    "xgboost (>=2.1.4,<3.0.0)",
+    "tensorflow (>=2.18.0,<3.0.0)"
 ]
 
 
