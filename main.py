@@ -71,7 +71,7 @@ def run():
     model.fit(X_train, y_train, epochs=100, batch_size=32, validation_data=(X_test, y_test))
 
     # model = RandomForestRegressor(n_estimators=100)
-    # model.fit(data[["Year", "Month", "Day", "Minutes", "Max Temp", "Min Temp", "Max Wet Bulb", "Min Wet Bulb"]], data["LBMP ($/MWHr)"])
+    # model.fit(data[["Year", "Month", "Day", "Minutes", "Max Temp", "Min Temp", "Max Wet Bulb", "Min Wet Bulb", "Day Ahead Price"]], data["LBMP ($/MWHr)"])
 
     # date: 2025/02/13 16:45
     results = model.predict(pd.DataFrame([[2025, 2, 13, (16 * 60) + 45, 48, 37, 44, 31, 76.48]]))
