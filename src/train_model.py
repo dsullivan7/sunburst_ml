@@ -20,7 +20,7 @@ def main():
     # model = RandomForestRegressor(n_estimators=100)
     # model.fit(data[["Year", "Month", "Day", "Minutes", "Max Temp", "Min Temp", "Max Wet Bulb", "Min Wet Bulb", "Day Ahead Price"]], data["LBMP ($/MWHr)"])
 
-    model.save(os.path.join(dirname, 'output/sunburst_ml.keras'))
+    model.save(os.path.join(dirname, 'model/sunburst_ml.keras'))
 
 if __name__=="__main__":
     main()
