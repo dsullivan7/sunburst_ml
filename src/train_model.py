@@ -15,7 +15,7 @@ def main():
     ])
     model.compile(optimizer='adam', loss='mean_squared_error')
     X_train, X_test, y_train, y_test = train_test_split(data[["Year", "Month", "Day", "Minutes", "Max Temp", "Min Temp", "Max Wet Bulb", "Min Wet Bulb", "Day Ahead Price"]], data["LBMP ($/MWHr)"], test_size=0.2, random_state=42)
-    model.fit(X_train, y_train, epochs=10, batch_size=32, validation_data=(X_test, y_test))
+    model.fit(X_train, y_train, epochs=100, batch_size=32, validation_data=(X_test, y_test))
 
     # model = RandomForestRegressor(n_estimators=100)
     # model.fit(data[["Year", "Month", "Day", "Minutes", "Max Temp", "Min Temp", "Max Wet Bulb", "Min Wet Bulb", "Day Ahead Price"]], data["LBMP ($/MWHr)"])
