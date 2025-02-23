@@ -21,7 +21,8 @@ def handler(event, context):
         body['min_temp'],
         body['max_wet_bulb'],
         body['min_wet_bulb'],
-        body['day_ahead_price']
+        body['day_ahead_price'],
+        body['load_forecast']
       ]]))
       # results = pd.Series([
       #   body['year'],
@@ -32,7 +33,8 @@ def handler(event, context):
       #   body['min_temp'],
       #   body['max_wet_bulb'],
       #   body['min_wet_bulb'],
-      #   body['day_ahead_price']
+      #   body['day_ahead_price'],
+      #   body['load_forecast']
       # ])
 
     return {
