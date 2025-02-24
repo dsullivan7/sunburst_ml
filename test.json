@@ -1,0 +1,12 @@
+{
+  "year": 2025,
+  "month": 2,
+  "day": 13,
+  "minutes": 1005,
+  "max_temp": 48,
+  "min_temp": 37,
+  "max_wet_bulb": 44,
+  "min_wet_bulb": 31,
+  "day_ahead_price": 76.48,
+  "load_forecast": 6133
+}

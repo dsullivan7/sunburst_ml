@@ -1,10 +1,13 @@
 import base64
 import json
+import os
 
 import pandas as pd
-import tensorflow as tf
+from pickle import load
 
-model = tf.keras.models.load_model('/var/sunburst_ml.keras')
+dirname = os.path.dirname(__file__)
+with open(os.path.join(dirname, 'model/sunburst_ml.pkl'), "rb") as f:
+  model = load(f)
 
 def handler(event, context):
     results = []
@@ -23,7 +26,7 @@ def handler(event, context):
         body['min_wet_bulb'],
         body['day_ahead_price'],
         body['load_forecast']
-      ]]))
+      ]], columns=["Year", "Month", "Day", "Minutes", "Max Temp", "Min Temp", "Max Wet Bulb", "Min Wet Bulb", "Day Ahead Price", "Load Forecast"]))
       # results = pd.Series([
       #   body['year'],
       #   body['month'],

@@ -9,7 +9,7 @@ RUN mkdir src/model
 COPY /poetry.lock .
 COPY /pyproject.toml .
 COPY /src/test_model.py ./src/
-COPY /src/model/sunburst_ml.keras ./src/model/sunburst_ml.keras
+COPY /src/model/sunburst_ml.pkl ./src/model/sunburst_ml.pkl
 
 RUN poetry export -f requirements.txt --output requirements.txt --without-hashes
 RUN pip install -r requirements.txt
