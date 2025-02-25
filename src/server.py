@@ -22,6 +22,10 @@ dirname = os.path.dirname(__file__)
 with open(os.path.join(dirname, 'model/sunburst_ml.pkl'), "rb") as f:
   model = load(f)
 
+@app.get("/")
+def get_health():
+   return {"response": "Welcome to the Sunburst Energy API"}
+
 @app.post("/predictions")
 def create_prediction(prediction_parameters: PredictionParameters):
   results = model.predict(pd.DataFrame([[
