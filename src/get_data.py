@@ -1,5 +1,6 @@
 import os
 import pandas as pd
+from pandas.tseries.holiday import USFederalHolidayCalendar as calendar
 
 from sklearn.model_selection import train_test_split
 
@@ -32,17 +33,6 @@ def main():
     final_nyc_loads.set_index('Time Stamp', inplace=True)
     final_nyc_loads = final_nyc_loads.groupby(level=0).first()
 
-    # import price data
-    nyc_prices = []
-    price_directory = os.path.join(dirname, 'data/prices')
-    for filename in os.listdir(price_directory):
-      price_data = pd.read_csv(os.path.join(price_directory, filename), header = 0)
-      nyc_price = price_data[:][(price_data["Name"] == "N.Y.C.")]
-      nyc_prices.append(nyc_price)
-
-    final_nyc_prices = pd.concat(nyc_prices, ignore_index=True)
-    final_nyc_prices["Time Stamp"] = pd.to_datetime(final_nyc_prices['Time Stamp'])
-
     # import day ahead price data
     nyc_da_prices = []
     da_price_directory = os.path.join(dirname, 'data/day_ahead_prices')
@@ -55,6 +45,20 @@ def main():
     final_nyc_da_prices.set_index(["Time Stamp"], inplace=True)
     final_nyc_da_prices = final_nyc_da_prices.groupby(level=0).first()
 
+    # import price data
+    nyc_prices = []
+    price_directory = os.path.join(dirname, 'data/prices')
+    for filename in os.listdir(price_directory):
+      price_data = pd.read_csv(os.path.join(price_directory, filename), header = 0)
+      nyc_price = price_data[:][(price_data["Name"] == "N.Y.C.")]
+      nyc_prices.append(nyc_price)
+
+    final_nyc_prices = pd.concat(nyc_prices, ignore_index=True)
+    final_nyc_prices["Time Stamp"] = pd.to_datetime(final_nyc_prices['Time Stamp'])
+
+    cal = calendar()
+    holidays = cal.holidays(start=final_nyc_prices["Time Stamp"].min(), end=final_nyc_prices["Time Stamp"].max())
+
     print("concatenating data")
     final_nyc_prices["Max Temp"] = final_nyc_prices["Time Stamp"].apply(lambda x: final_nyc_temps.loc[x.strftime('%m/%d/%Y')]["Max Temp"] )
     final_nyc_prices["Min Temp"] = final_nyc_prices["Time Stamp"].apply(lambda x: final_nyc_temps.loc[x.strftime('%m/%d/%Y')]["Min Temp"] )
@@ -65,6 +69,8 @@ def main():
     final_nyc_prices["Day"] = final_nyc_prices["Time Stamp"].apply(lambda x: x.day)
     final_nyc_prices["Hour"] = final_nyc_prices["Time Stamp"].apply(lambda x: x.hour)
     final_nyc_prices["Minutes"] = final_nyc_prices["Time Stamp"].apply(lambda x: x.hour * 60 + x.minute)
+    final_nyc_prices["Day Of Week"] = final_nyc_prices["Time Stamp"].apply(lambda x: x.day_of_week )
+    final_nyc_prices["Is Holiday"] = final_nyc_prices["Time Stamp"].isin(holidays)
     final_nyc_prices["Day Ahead Price"] = final_nyc_prices["Time Stamp"].apply(lambda x: final_nyc_da_prices.loc[x.strftime('%m/%d/%Y %H:00')]["LBMP ($/MWHr)"] )
     final_nyc_prices["Load Forecast"] = final_nyc_prices["Time Stamp"].apply(lambda x: final_nyc_loads.loc[x.strftime('%m/%d/%Y %H:00')]["N.Y.C."] )
 
