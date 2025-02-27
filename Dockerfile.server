@@ -7,7 +7,10 @@ RUN mkdir ./src/model
 
 COPY pyproject.toml poetry.lock ./
 COPY src/server.py ./src/
-COPY src/model/sunburst_ml.pkl ./src/model/
+COPY src/nyiso.py ./src/
+COPY src/model/sunburst_ml.json ./src/model/
+COPY src/model/target_scaler.pkl ./src/model/
+COPY src/model/train_scaler.pkl ./src/model/
 
 RUN pip install poetry && poetry install --no-root
 
