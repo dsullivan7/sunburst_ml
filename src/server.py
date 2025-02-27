@@ -42,8 +42,8 @@ def get_health():
    return {"response": "Welcome to the Sunburst Energy API"}
 
 @app.get("/predictions")
-def get_prediction(time_stamp: str):
-  nyiso_data = nyiso.get_data(time_stamp)
+async def get_prediction(time_stamp: str):
+  nyiso_data = await nyiso.get_data(time_stamp)
   results = model.predict(pd.DataFrame([[
     nyiso_data.nyc_parameters.year,
     nyiso_data.nyc_parameters.month,

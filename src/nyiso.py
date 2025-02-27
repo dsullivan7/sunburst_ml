@@ -1,7 +1,8 @@
+import asyncio
 import calendar
 import io
-import urllib.request
 
+import aiohttp
 import pandas as pd
 from pandas.tseries.holiday import USFederalHolidayCalendar as calendar
 
@@ -27,16 +28,24 @@ class NYISOData:
   nyc_actual_price: float
   nyc_parameters: NYISOParameters
 
-def get_data(time_stamp):
+async def fetch_data(session, url):
+  async with session.get(url) as response:
+    data = await response.text()
+    return data
+
+async def get_data(time_stamp):
   date = pd.to_datetime(time_stamp)
   date_day_before = date - pd.Timedelta(days=1)
 
-  price_data_response = urllib.request.urlopen(f"https://mis.nyiso.com/public/csv/realtime/{date.year}{date.month:02d}{date.day:02d}realtime_zone.csv").read()
-  day_ahead_price_data_response = urllib.request.urlopen(f"https://mis.nyiso.com/public/csv/damlbmp/{date.year}{date.month:02d}{date.day:02d}damlbmp_zone.csv").read()
-  weather_data_tesponse = urllib.request.urlopen(f"https://mis.nyiso.com/public/csv/lfweather/{date_day_before.year}{date_day_before.month:02d}{(date_day_before.day):02d}lfweather.csv").read()
-  load_forecast_data_response = urllib.request.urlopen(f"https://mis.nyiso.com/public/csv/isolf/{date.year}{date.month:02d}{date.day:02d}isolf.csv").read()
+  async with aiohttp.ClientSession() as session:
+    price_data_response, day_ahead_price_data_response, weather_data_tesponse, load_forecast_data_response = await asyncio.gather(
+      fetch_data(session, f"https://mis.nyiso.com/public/csv/realtime/{date.year}{date.month:02d}{date.day:02d}realtime_zone.csv"),
+      fetch_data(session, f"https://mis.nyiso.com/public/csv/damlbmp/{date.year}{date.month:02d}{date.day:02d}damlbmp_zone.csv"),
+      fetch_data(session, f"https://mis.nyiso.com/public/csv/lfweather/{date_day_before.year}{date_day_before.month:02d}{(date_day_before.day):02d}lfweather.csv"),
+      fetch_data(session, f"https://mis.nyiso.com/public/csv/isolf/{date.year}{date.month:02d}{date.day:02d}isolf.csv"),
+    )
 
-  price_data = pd.read_csv(io.BytesIO(price_data_response))
+  price_data = pd.read_csv(io.StringIO(price_data_response))
   price_data["Time Stamp"] = pd.to_datetime(price_data["Time Stamp"])
   nyc_price_data = price_data[price_data["Name"] == "N.Y.C."]
   nyc_actual_price = nyc_price_data[
@@ -47,15 +56,15 @@ def get_data(time_stamp):
     (nyc_price_data["Time Stamp"].dt.minute == date.minute)
     ]['LBMP ($/MWHr)'].values[0]
 
-  day_ahead_price_data = pd.read_csv(io.BytesIO(day_ahead_price_data_response))
+  day_ahead_price_data = pd.read_csv(io.StringIO(day_ahead_price_data_response))
   day_ahead_price_data["Time Stamp"] = pd.to_datetime(day_ahead_price_data["Time Stamp"])
   nyc_day_ahead_price_data = day_ahead_price_data[day_ahead_price_data["Name"] == "N.Y.C."]
   nyc_day_ahead_price = nyc_day_ahead_price_data[pd.to_datetime(nyc_day_ahead_price_data["Time Stamp"]).dt.hour == date.hour]['LBMP ($/MWHr)'].values[0]
 
-  weather_data = pd.read_csv(io.BytesIO(weather_data_tesponse))
+  weather_data = pd.read_csv(io.StringIO(weather_data_tesponse))
   nyc_weather_data = weather_data[:][(weather_data["Station ID"] == "NYC") & (pd.to_datetime(weather_data["Vintage Date"]) == (pd.to_datetime(weather_data["Forecast Date"]) + pd.Timedelta(days=1)))]
 
-  load_forecast_data = pd.read_csv(io.BytesIO(load_forecast_data_response))
+  load_forecast_data = pd.read_csv(io.StringIO(load_forecast_data_response))
   load_forecast_data["Time Stamp"] = pd.to_datetime(load_forecast_data["Time Stamp"])
   nyc_load_forecast = load_forecast_data[
      (load_forecast_data["Time Stamp"].dt.year == date.year) &
