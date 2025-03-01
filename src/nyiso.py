@@ -37,9 +37,11 @@ async def get_data(time_stamp):
   date = pd.to_datetime(time_stamp)
   date_day_before = date - pd.Timedelta(days=1)
 
+  price_day = date_day_before if date.hour == 0 and date.minute == 0 else date
+
   async with aiohttp.ClientSession() as session:
     price_data_response, day_ahead_price_data_response, weather_data_tesponse, load_forecast_data_response = await asyncio.gather(
-      fetch_data(session, f"https://mis.nyiso.com/public/csv/realtime/{date.year}{date.month:02d}{date.day:02d}realtime_zone.csv"),
+      fetch_data(session, f"https://mis.nyiso.com/public/csv/realtime/{price_day.year}{price_day.month:02d}{price_day.day:02d}realtime_zone.csv"),
       fetch_data(session, f"https://mis.nyiso.com/public/csv/damlbmp/{date.year}{date.month:02d}{date.day:02d}damlbmp_zone.csv"),
       fetch_data(session, f"https://mis.nyiso.com/public/csv/lfweather/{date_day_before.year}{date_day_before.month:02d}{(date_day_before.day):02d}lfweather.csv"),
       fetch_data(session, f"https://mis.nyiso.com/public/csv/isolf/{date.year}{date.month:02d}{date.day:02d}isolf.csv"),
