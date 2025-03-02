@@ -8,6 +8,7 @@ RUN mkdir ./src/model
 COPY pyproject.toml poetry.lock ./
 COPY src/server.py ./src/
 COPY src/nyiso.py ./src/
+COPY src/rag.py ./src/
 COPY src/model/lstm_price_predictor.keras ./src/model/
 COPY src/model/target_scaler_lstm.pkl ./src/model/
 COPY src/model/train_scaler_lstm.pkl ./src/model/

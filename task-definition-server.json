@@ -25,6 +25,12 @@
           "containerPort": 80,
           "hostPort": 80
         }
+      ],
+      "secrets": [
+        {
+          "name": "OPENAI_API_KEY",
+          "valueFrom": "arn:aws:ssm:us-east-2:688567297629:parameter/prod/sunburst/OPENAI_API_KEY"
+        }
       ]
     }
   ]
