@@ -1,26 +1,24 @@
-import openai
+import os
+from openai import OpenAI
 import faiss
 import numpy as np
-import tiktoken
 
 # OpenAI API key (replace with your actual key)
-OPENAI_API_KEY = "your-api-key"
+OPENAI_API_KEY = os.environ["OPENAI_API_KEY"]
+
+client = OpenAI()
 
 # Sample documents (these can be from PDFs, articles, etc.)
 documents = [
-    "Quantum computing is a type of computation that harnesses the power of quantum mechanics.",
-    "Neural networks are a subset of machine learning algorithms used for deep learning.",
-    "The capital of France is Paris, known for its rich history and culture.",
+    "Product X for Capital Partners provides AI-enabled tools that expedite sourcing, evaluating, and due diligence on new opportunities.",
+    "Product X for Climate Companies provides a platform to organize and present your investment opportunity in the best way possible for capital partners.",
 ]
 
 # Function to get embeddings from OpenAI
-def get_embedding(text):
-    response = openai.Embedding.create(
-        input=text,
-        model="text-embedding-ada-002",
-        api_key=OPENAI_API_KEY
-    )
-    return np.array(response["data"][0]["embedding"])
+def get_embedding(text, model="text-embedding-3-small"):
+    text = text.replace("\n", " ")
+    response = client.embeddings.create(input = [text], model=model).data[0].embedding
+    return np.array(response)
 
 # Convert all documents to embeddings
 doc_embeddings = np.array([get_embedding(doc) for doc in documents])
@@ -43,16 +41,10 @@ def generate_response(query):
 
     prompt = f"Using the following retrieved information:\n{context}\nAnswer the question: {query}"
 
-    response = openai.ChatCompletion.create(
-        model="gpt-4",
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
         messages=[{"role": "system", "content": "You are a helpful AI assistant."},
                   {"role": "user", "content": prompt}],
-        api_key=OPENAI_API_KEY
     )
 
-    return response["choices"][0]["message"]["content"]
-
-# Example Query
-query = "What is quantum computing?"
-response = generate_response(query)
-print(response)
+    return response.choices[0].message.content

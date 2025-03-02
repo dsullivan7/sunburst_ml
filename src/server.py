@@ -12,20 +12,10 @@ from pandas.tseries.holiday import USFederalHolidayCalendar as calendar
 import xgboost as xgb
 
 from . import nyiso
+from . import rag
 
-class PredictionParameters(BaseModel):
-    year: int
-    month: int
-    day: int
-    minutes: int
-    max_temp: float
-    min_temp: float
-    max_wet_bulb: float
-    min_wet_bulb: float
-    day_ahead_price: float
-    load_forecast: float
-    day_of_week: int
-    is_holiday: bool
+class Query(BaseModel):
+    query: str
 
 app = FastAPI()
 dirname = os.path.dirname(__file__)
@@ -46,6 +36,16 @@ with open(os.path.join(dirname, "model/target_scaler_lstm.pkl"), "rb") as file:
 @app.get("/")
 def get_health():
    return {"response": "Welcome to the Sunburst Energy API"}
+
+
+@app.post("/queries")
+async def create_query(query: Query):
+  result = rag.generate_response(query.query)
+  return {
+    "response": {
+      "result": result,
+    }
+  }
 
 @app.get("/predictions")
 async def get_prediction(time_stamp: str):
