@@ -73,6 +73,7 @@ async def get_prediction(time_stamp: str):
   date_minus_21 = date - pd.Timedelta(hours=21)
   date_minus_22 = date - pd.Timedelta(hours=22)
   date_minus_23 = date - pd.Timedelta(hours=23)
+  date_minus_24 = date - pd.Timedelta(hours=24)
 
   (
      nyiso_data,
@@ -126,6 +127,38 @@ async def get_prediction(time_stamp: str):
      nyiso.get_data(date_minus_23),
   )
 
+  data_list = [
+    nyiso_data,
+    nyiso_data_minus_1,
+    nyiso_data_minus_2,
+    nyiso_data_minus_3,
+    nyiso_data_minus_4,
+    nyiso_data_minus_5,
+    nyiso_data_minus_6,
+    nyiso_data_minus_7,
+    nyiso_data_minus_8,
+    nyiso_data_minus_9,
+    nyiso_data_minus_10,
+    nyiso_data_minus_11,
+    nyiso_data_minus_12,
+    nyiso_data_minus_13,
+    nyiso_data_minus_14,
+    nyiso_data_minus_15,
+    nyiso_data_minus_16,
+    nyiso_data_minus_17,
+    nyiso_data_minus_18,
+    nyiso_data_minus_19,
+    nyiso_data_minus_20,
+    nyiso_data_minus_21,
+    nyiso_data_minus_22,
+    nyiso_data_minus_23,
+  ]
+
+  if any(x is None for x in data_list):
+     nyiso_data_minus_24 = await nyiso.get_data(date_minus_24)
+     data_list = list(filter(lambda x: x is not None, data_list))
+     data_list.append(nyiso_data_minus_24)
+
   data = train_scaler.transform(list(map(lambda x: [
       x.nyc_parameters.year,
       x.nyc_parameters.month,
@@ -140,32 +173,7 @@ async def get_prediction(time_stamp: str):
       x.nyc_parameters.day_of_week,
       x.nyc_parameters.is_holiday,
      ],
-     [
-        nyiso_data,
-        nyiso_data_minus_1,
-        nyiso_data_minus_2,
-        nyiso_data_minus_3,
-        nyiso_data_minus_4,
-        nyiso_data_minus_5,
-        nyiso_data_minus_6,
-        nyiso_data_minus_7,
-        nyiso_data_minus_8,
-        nyiso_data_minus_9,
-        nyiso_data_minus_10,
-        nyiso_data_minus_11,
-        nyiso_data_minus_12,
-        nyiso_data_minus_13,
-        nyiso_data_minus_14,
-        nyiso_data_minus_15,
-        nyiso_data_minus_16,
-        nyiso_data_minus_17,
-        nyiso_data_minus_18,
-        nyiso_data_minus_19,
-        nyiso_data_minus_20,
-        nyiso_data_minus_21,
-        nyiso_data_minus_22,
-        nyiso_data_minus_23,
-      ]
+     data_list,
     )))
 
   # dmatrix = xgb.DMatrix(data_scaled)

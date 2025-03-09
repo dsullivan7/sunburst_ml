@@ -2,16 +2,16 @@
   "family": "sunburst-ml-server",
   "executionRoleArn": "arn:aws:iam::688567297629:role/sunburst-ecs-exec-role",
   "networkMode": "awsvpc",
-  "requiresCompatibilities": ["FARGATE"],
+  "requiresCompatibilities": ["EC2"],
   "cpu": "1024",
-  "memory": "8192",
+  "memory": "944",
   "containerDefinitions": [
     {
       "name": "sunburst-ml-server",
       "image": "688567297629.dkr.ecr.us-east-2.amazonaws.com/sunburst-ml-server-0949098:latest",
       "essential": true,
       "cpu": 1024,
-      "memory": 8192,
+      "memory": 944,
       "logConfiguration": {
         "logDriver": "awslogs",
         "options": {

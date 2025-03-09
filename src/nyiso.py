@@ -50,18 +50,24 @@ async def get_data(time_stamp):
   price_data = pd.read_csv(io.StringIO(price_data_response))
   price_data["Time Stamp"] = pd.to_datetime(price_data["Time Stamp"])
   nyc_price_data = price_data[price_data["Name"] == "N.Y.C."]
-  nyc_actual_price = nyc_price_data[
+  nyc_actual_prices = nyc_price_data[
     (nyc_price_data["Time Stamp"].dt.year == date.year) &
     (nyc_price_data["Time Stamp"].dt.month == date.month) &
     (nyc_price_data["Time Stamp"].dt.day == date.day) &
     (nyc_price_data["Time Stamp"].dt.hour == date.hour) &
     (nyc_price_data["Time Stamp"].dt.minute == date.minute)
-    ]['LBMP ($/MWHr)'].values[0]
+    ]['LBMP ($/MWHr)'].to_numpy()
+
+  # accounting for daylight savings time
+  if len(nyc_actual_prices) <= 0:
+    return None
+
+  nyc_actual_price = nyc_actual_prices[0]
 
   day_ahead_price_data = pd.read_csv(io.StringIO(day_ahead_price_data_response))
   day_ahead_price_data["Time Stamp"] = pd.to_datetime(day_ahead_price_data["Time Stamp"])
   nyc_day_ahead_price_data = day_ahead_price_data[day_ahead_price_data["Name"] == "N.Y.C."]
-  nyc_day_ahead_price = nyc_day_ahead_price_data[pd.to_datetime(nyc_day_ahead_price_data["Time Stamp"]).dt.hour == date.hour]['LBMP ($/MWHr)'].values[0]
+  nyc_day_ahead_price = nyc_day_ahead_price_data[pd.to_datetime(nyc_day_ahead_price_data["Time Stamp"]).dt.hour == date.hour]['LBMP ($/MWHr)'].to_numpy()[0]
 
   weather_data = pd.read_csv(io.StringIO(weather_data_tesponse))
   nyc_weather_data = weather_data[:][(weather_data["Station ID"] == "NYC") & (pd.to_datetime(weather_data["Vintage Date"]) == (pd.to_datetime(weather_data["Forecast Date"]) + pd.Timedelta(days=1)))]
@@ -73,7 +79,7 @@ async def get_data(time_stamp):
      (load_forecast_data["Time Stamp"].dt.month == date.month) &
      (load_forecast_data["Time Stamp"].dt.day == date.day) &
      (load_forecast_data["Time Stamp"].dt.hour == date.hour)
-  ]["N.Y.C."].values[0]
+  ]["N.Y.C."].to_numpy()[0]
 
   cal = calendar()
   holidays = cal.holidays(start=date, end=date)
@@ -85,10 +91,10 @@ async def get_data(time_stamp):
       month=date.month,
       day=date.day,
       minutes=date.hour * 60 + date.minute,
-      max_temp=nyc_weather_data["Max Temp"].values[0],
-      min_temp=nyc_weather_data["Min Temp"].values[0],
-      max_wet_bulb=nyc_weather_data["Max Wet Bulb"].values[0],
-      min_wet_bulb=nyc_weather_data["Min Wet Bulb"].values[0],
+      max_temp=nyc_weather_data["Max Temp"].to_numpy()[0],
+      min_temp=nyc_weather_data["Min Temp"].to_numpy()[0],
+      max_wet_bulb=nyc_weather_data["Max Wet Bulb"].to_numpy()[0],
+      min_wet_bulb=nyc_weather_data["Min Wet Bulb"].to_numpy()[0],
       day_ahead_price=nyc_day_ahead_price,
       load_forecast=nyc_load_forecast,
       day_of_week=date.day_of_week,
